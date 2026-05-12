@@ -1,0 +1,94 @@
+// Client-side API utilities
+
+export async function fetchSeeker() {
+  const response = await fetch('/api/seeker', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch seeker data');
+  }
+
+  return response.json();
+}
+
+export async function updateSeeker(data: Record<string, any>) {
+  const response = await fetch('/api/seeker', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update seeker data');
+  }
+
+  return response.json();
+}
+
+export async function fetchProvider() {
+  const response = await fetch('/api/provider', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch provider data');
+  }
+
+  return response.json();
+}
+
+export async function updateProvider(data: Record<string, any>) {
+  const response = await fetch('/api/provider', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update provider data');
+  }
+
+  return response.json();
+}
+
+export async function fetchJobs() {
+  const response = await fetch('/api/jobs', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch jobs');
+  }
+
+  return response.json();
+}
+
+export async function createJobPosting(data: Record<string, any>) {
+  const response = await fetch('/api/jobs', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to create job posting');
+  }
+
+  return response.json();
+}
