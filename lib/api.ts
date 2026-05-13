@@ -57,11 +57,13 @@ export async function updateProvider(data: Record<string, any>) {
     body: JSON.stringify(data),
   });
 
+  const result = await response.json();
+
   if (!response.ok) {
-    throw new Error('Failed to update provider data');
+    throw new Error(result.error || 'Failed to update provider data');
   }
 
-  return response.json();
+  return result;
 }
 
 export async function fetchJobs() {
@@ -88,9 +90,11 @@ export async function createJobPosting(data: Record<string, any>) {
     body: JSON.stringify(data),
   });
 
+  const result = await response.json();
+
   if (!response.ok) {
-    throw new Error('Failed to create job posting');
+    throw new Error(result.error || 'Failed to create job posting');
   }
 
-  return response.json();
+  return result;
 }
