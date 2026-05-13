@@ -24,11 +24,13 @@ export async function updateSeeker(data: Record<string, any>) {
     body: JSON.stringify(data),
   });
 
+  const result = await response.json();
+
   if (!response.ok) {
-    throw new Error('Failed to update seeker data');
+    throw new Error(result.error || 'Failed to update seeker data');
   }
 
-  return response.json();
+  return result;
 }
 
 export async function fetchProvider() {
