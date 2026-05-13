@@ -5,14 +5,17 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
+import { createJobPosting } from '@/lib/api';
 
 export default function JobPostingPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
   const [formData, setFormData] = useState({
     jobTitle: '',
-    jobType: 'full-time',
-    seniority: 'mid',
+    jobType: 'Full-time',
+    seniority: 'Mid',
     location: '',
     salary: '',
     description: '',
@@ -25,23 +28,42 @@ export default function JobPostingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    setError('');
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 600));
-    setIsLoading(false);
-    router.push('/provider/dashboard');
+
+    try {
+      await createJobPosting({
+        title: formData.jobTitle,
+        description: formData.description,
+        requirements: formData.requirements || 'Not specified',
+        salary_range: formData.salary || null,
+        location: formData.location,
+        job_type: `${formData.jobType} · ${formData.seniority}`,
+        is_active: true,
+      });
+
+      router.push('/provider/dashboard');
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : 'Failed to publish job');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const isComplete = formData.jobTitle && formData.location && formData.description;
+  const isComplete =
+    formData.jobTitle &&
+    formData.location &&
+    formData.description &&
+    formData.requirements;
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Ambient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.08] via-transparent to-transparent" />
 
-      {/* Content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen p-6">
         <div className="max-w-2xl w-full space-y-8">
-          {/* Header */}
           <div className="text-center space-y-3">
             <h1 className="text-4xl font-light tracking-tight">
               Post Your First Job
@@ -51,10 +73,14 @@ export default function JobPostingPage() {
             </p>
           </div>
 
-          {/* Form Card */}
           <Card className="border-border/40 bg-card/40 backdrop-blur-sm p-8 space-y-6">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Job Title */}
+              {error && (
+                <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-sm text-destructive">
+                  {error}
+                </div>
+              )}
+
               <div className="space-y-2">
                 <label htmlFor="jobTitle" className="block text-sm font-medium">
                   Job Title
@@ -71,9 +97,7 @@ export default function JobPostingPage() {
                 />
               </div>
 
-              {/* Job Details Row */}
-              <div className="grid grid-cols-3 gap-4">
-                {/* Job Type */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label htmlFor="jobType" className="block text-sm font-medium">
                     Job Type
@@ -88,10 +112,11 @@ export default function JobPostingPage() {
                     <option>Full-time</option>
                     <option>Part-time</option>
                     <option>Contract</option>
+                    <option>Internship</option>
+                    <option>Remote</option>
                   </select>
                 </div>
 
-                {/* Seniority */}
                 <div className="space-y-2">
                   <label htmlFor="seniority" className="block text-sm font-medium">
                     Seniority
@@ -107,10 +132,10 @@ export default function JobPostingPage() {
                     <option>Mid</option>
                     <option>Senior</option>
                     <option>Lead</option>
+                    <option>Executive</option>
                   </select>
                 </div>
 
-                {/* Location */}
                 <div className="space-y-2">
                   <label htmlFor="location" className="block text-sm font-medium">
                     Location
@@ -128,10 +153,9 @@ export default function JobPostingPage() {
                 </div>
               </div>
 
-              {/* Salary */}
               <div className="space-y-2">
                 <label htmlFor="salary" className="block text-sm font-medium">
-                  Salary Range (Optional)
+                  Salary Range
                 </label>
                 <Input
                   id="salary"
@@ -144,7 +168,6 @@ export default function JobPostingPage() {
                 />
               </div>
 
-              {/* Job Description */}
               <div className="space-y-2">
                 <label htmlFor="description" className="block text-sm font-medium">
                   Job Description
@@ -161,36 +184,39 @@ export default function JobPostingPage() {
                 />
               </div>
 
-              {/* Requirements */}
               <div className="space-y-2">
                 <label htmlFor="requirements" className="block text-sm font-medium">
                   Key Requirements
                 </label>
                 <textarea
                   id="requirements"
-                  placeholder="List the must-have skills and experience..."
+                  placeholder="List must-have skills, experience, visa requirements, language requirements, etc."
                   value={formData.requirements}
                   onChange={(e) => handleInputChange('requirements', e.target.value)}
                   disabled={isLoading}
+                  required
                   rows={4}
                   className="w-full bg-input border border-border/40 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:border-transparent resize-none"
                 />
               </div>
 
               <div className="bg-accent/10 border border-accent/30 rounded-lg p-4 text-sm text-muted-foreground">
-                <p>✓ After posting, we&apos;ll match qualified seekers with this opportunity.</p>
+                <p>
+                  ✓ After posting, this role will be saved to your provider account and surfaced for matching.
+                </p>
               </div>
 
-              {/* Buttons */}
               <div className="flex gap-3 pt-4">
                 <Button
                   type="button"
                   variant="outline"
                   disabled={isLoading}
+                  onClick={() => router.push('/provider/dashboard')}
                   className="flex-1 rounded-full border-border/40"
                 >
-                  Save Draft
+                  Cancel
                 </Button>
+
                 <Button
                   type="submit"
                   disabled={!isComplete || isLoading}
