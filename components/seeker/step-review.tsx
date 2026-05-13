@@ -14,18 +14,40 @@ export function StepReview({ onPrevious }: StepReviewProps) {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 800));
-    setIsSubmitted(true);
-    setIsLoading(false);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    // Redirect to dashboard after showing success
+  try {
+    setIsLoading(true);
+
+    const response = await fetch('/api/seeker', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        onboarding_completed_at: new Date().toISOString(),
+        status: 'active',
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to complete onboarding');
+    }
+
+    setIsSubmitted(true);
+
     setTimeout(() => {
       router.push('/seeker/dashboard');
     }, 1500);
-  };
+
+  } catch (error) {
+    console.error(error);
+    alert('Failed to complete onboarding');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   if (isSubmitted) {
     return (
