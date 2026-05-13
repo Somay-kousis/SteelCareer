@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { updateSeeker } from '@/lib/api';
 
 interface StepGoalsProps {
   onNext: () => void;
@@ -22,13 +23,26 @@ export function StepGoals({ onNext, onPrevious }: StepGoalsProps) {
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [otherGoals, setOtherGoals] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    setError('');
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 400));
-    setIsLoading(false);
-    onNext();
+
+    try {
+      await updateSeeker({
+        career_goals: selectedGoals,
+        onboarding_notes: otherGoals,
+      });
+
+      onNext();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save goals');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleGoal = (goalId: string) => {
@@ -43,7 +57,6 @@ export function StepGoals({ onNext, onPrevious }: StepGoalsProps) {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="text-center space-y-3">
         <h1 className="text-4xl font-light tracking-tight">
           Your Career Goals
@@ -53,10 +66,15 @@ export function StepGoals({ onNext, onPrevious }: StepGoalsProps) {
         </p>
       </div>
 
-      {/* Form Card */}
       <Card className="border-border/40 bg-card/40 backdrop-blur-sm p-8 space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Goal Options */}
+
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {goalOptions.map((option) => (
               <button
@@ -82,6 +100,7 @@ export function StepGoals({ onNext, onPrevious }: StepGoalsProps) {
                       <span className="text-accent-foreground text-xs font-bold">✓</span>
                     )}
                   </div>
+
                   <div className="flex-1">
                     <p className="font-medium text-sm">{option.label}</p>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -93,11 +112,11 @@ export function StepGoals({ onNext, onPrevious }: StepGoalsProps) {
             ))}
           </div>
 
-          {/* Other Goals */}
           <div className="space-y-2 pt-4 border-t border-border/40">
             <label htmlFor="otherGoals" className="block text-sm font-medium">
               Anything else we should know?
             </label>
+
             <textarea
               id="otherGoals"
               placeholder="Tell us about any other goals or preferences..."
@@ -109,7 +128,6 @@ export function StepGoals({ onNext, onPrevious }: StepGoalsProps) {
             />
           </div>
 
-          {/* Navigation Buttons */}
           <div className="flex gap-3 pt-4">
             <Button
               type="button"
@@ -120,6 +138,7 @@ export function StepGoals({ onNext, onPrevious }: StepGoalsProps) {
             >
               Back
             </Button>
+
             <Button
               type="submit"
               disabled={!isComplete || isLoading}
