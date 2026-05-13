@@ -41,7 +41,9 @@ export function SignUpForm({ role, onBack }: SignUpFormProps) {
 
     try {
       const supabase = createClient();
-      const [firstName, lastName] = fullName.trim().split(' ');
+      const nameParts = fullName.trim().split(' ');
+const firstName = nameParts[0] || '';
+const lastName = nameParts.slice(1).join(' ') || '';
       
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
