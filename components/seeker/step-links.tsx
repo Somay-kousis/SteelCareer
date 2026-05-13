@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { updateSeeker } from '@/lib/api';
 
 interface StepLinksProps {
   onNext: () => void;
@@ -21,6 +22,7 @@ const linkTypes = [
 export function StepLinks({ onNext, onPrevious }: StepLinksProps) {
   const [links, setLinks] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleLinkChange = (id: string, value: string) => {
     setLinks(prev => ({ ...prev, [id]: value }));
@@ -28,17 +30,31 @@ export function StepLinks({ onNext, onPrevious }: StepLinksProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 400));
-    setIsLoading(false);
-    onNext();
-  };
 
-  const hasAtLeastOne = Object.values(links).some(link => link.trim());
+    setError('');
+    setIsLoading(true);
+
+    try {
+      await updateSeeker({
+        linkedin_profile: links.linkedin || null,
+        github_profile: links.github || null,
+        website_url: links.portfolio || null,
+        portfolio_links: {
+          twitter: links.twitter || null,
+          other: links.other || null,
+        },
+      });
+
+      onNext();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save links');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="text-center space-y-3">
         <h1 className="text-4xl font-light tracking-tight">
           Online Presence
@@ -48,9 +64,14 @@ export function StepLinks({ onNext, onPrevious }: StepLinksProps) {
         </p>
       </div>
 
-      {/* Form Card */}
       <Card className="border-border/40 bg-card/40 backdrop-blur-sm p-8 space-y-6">
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
+
           {linkTypes.map((linkType) => (
             <div key={linkType.id} className="space-y-2">
               <label htmlFor={linkType.id} className="block text-sm font-medium">
@@ -69,10 +90,12 @@ export function StepLinks({ onNext, onPrevious }: StepLinksProps) {
           ))}
 
           <div className="bg-accent/10 border border-accent/30 rounded-lg p-4 text-sm text-muted-foreground mt-6">
-            <p>💡 <span className="text-foreground font-medium">Tip:</span> The more details you provide, the better opportunities we can match for you.</p>
+            <p>
+              💡 <span className="text-foreground font-medium">Tip:</span>{' '}
+              The more details you provide, the better opportunities we can match for you.
+            </p>
           </div>
 
-          {/* Navigation Buttons */}
           <div className="flex gap-3 pt-4">
             <Button
               type="button"
@@ -83,6 +106,7 @@ export function StepLinks({ onNext, onPrevious }: StepLinksProps) {
             >
               Back
             </Button>
+
             <Button
               type="submit"
               disabled={isLoading}
