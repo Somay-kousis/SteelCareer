@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       .from('providers')
       .select('id')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
 
     if (providerError || !provider) {
       return NextResponse.json(
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
         },
       ])
       .select()
-      .single();
+      .maybeSingle();
 
     if (insertError) {
       return NextResponse.json(
