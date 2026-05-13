@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { updateSeeker } from '@/lib/api';
 
 interface StepSupportProps {
   onNext: () => void;
@@ -23,13 +24,25 @@ const supportOptions = [
 export function StepSupport({ onNext, onPrevious }: StepSupportProps) {
   const [selectedSupport, setSelectedSupport] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    setError('');
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 400));
-    setIsLoading(false);
-    onNext();
+
+    try {
+      await updateSeeker({
+        support_areas: selectedSupport,
+      });
+
+      onNext();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save support preferences');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleSupport = (supportId: string) => {
@@ -42,7 +55,6 @@ export function StepSupport({ onNext, onPrevious }: StepSupportProps) {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="text-center space-y-3">
         <h1 className="text-4xl font-light tracking-tight">
           What Support Do You Need?
@@ -52,10 +64,14 @@ export function StepSupport({ onNext, onPrevious }: StepSupportProps) {
         </p>
       </div>
 
-      {/* Form Card */}
       <Card className="border-border/40 bg-card/40 backdrop-blur-sm p-8 space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Support Options Grid */}
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {supportOptions.map((option) => (
               <button
@@ -81,6 +97,7 @@ export function StepSupport({ onNext, onPrevious }: StepSupportProps) {
                       <span className="text-accent-foreground text-xs font-bold">✓</span>
                     )}
                   </div>
+
                   <div className="flex-1">
                     <p className="font-medium text-sm">{option.label}</p>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -93,10 +110,12 @@ export function StepSupport({ onNext, onPrevious }: StepSupportProps) {
           </div>
 
           <div className="bg-accent/10 border border-accent/30 rounded-lg p-4 text-sm text-muted-foreground mt-6">
-            <p>✨ <span className="text-foreground font-medium">Personalized approach:</span> You can adjust these preferences anytime in your dashboard.</p>
+            <p>
+              ✨ <span className="text-foreground font-medium">Personalized approach:</span>{' '}
+              You can adjust these preferences anytime in your dashboard.
+            </p>
           </div>
 
-          {/* Navigation Buttons */}
           <div className="flex gap-3 pt-4">
             <Button
               type="button"
@@ -107,6 +126,7 @@ export function StepSupport({ onNext, onPrevious }: StepSupportProps) {
             >
               Back
             </Button>
+
             <Button
               type="submit"
               disabled={isLoading}
