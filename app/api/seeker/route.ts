@@ -4,8 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
-    
-    // Get authenticated user
+
     const {
       data: { user },
       error: authError,
@@ -19,44 +18,30 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    
-    // Check if seeker exists
-    const { data: existingSeeker } = await supabase
+
+    const { error } = await supabase
       .from('seekers')
-      .select('id')
-      .eq('user_id', user.id)
-      .single();
+      .upsert(
+        {
+          ...body,
+          user_id: user.id,
+        },
+        {
+          onConflict: 'user_id',
+        }
+      );
 
-    if (existingSeeker) {
-      // Update existing seeker
-      const { error: updateError } = await supabase
-        .from('seekers')
-        .update(body)
-        .eq('user_id', user.id);
-
-      if (updateError) {
-        return NextResponse.json(
-          { error: updateError.message },
-          { status: 400 }
-        );
-      }
-    } else {
-      // Create new seeker
-      const { error: insertError } = await supabase
-        .from('seekers')
-        .insert([{ ...body, user_id: user.id }]);
-
-      if (insertError) {
-        return NextResponse.json(
-          { error: insertError.message },
-          { status: 400 }
-        );
-      }
+    if (error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[v0] API error:', error);
+    console.error('[seeker POST] API error:', error);
+
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -67,7 +52,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    
+
     const {
       data: { user },
       error: authError,
@@ -84,9 +69,9 @@ export async function GET(request: NextRequest) {
       .from('seekers')
       .select('*')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') {
+    if (error) {
       return NextResponse.json(
         { error: error.message },
         { status: 400 }
@@ -95,7 +80,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ seeker });
   } catch (error) {
-    console.error('[v0] API error:', error);
+    console.error('[seeker GET] API error:', error);
+
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

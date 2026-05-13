@@ -32,11 +32,10 @@ export function StepGoals({ onNext, onPrevious }: StepGoalsProps) {
     setIsLoading(true);
 
     try {
-      await updateSeeker({
-        career_goals: selectedGoals,
-        onboarding_notes: otherGoals,
-      });
-
+await updateSeeker({
+  target_roles: selectedGoals,
+  goals_summary: otherGoals,
+});
       onNext();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save goals');
