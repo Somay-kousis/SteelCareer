@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { updateSeeker } from '@/lib/api';
 
 interface StepBackgroundProps {
   onNext: () => void;
@@ -16,20 +17,36 @@ export function StepBackground({ onNext, onPrevious }: StepBackgroundProps) {
   const [yearsExperience, setYearsExperience] = useState('');
   const [skills, setSkills] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 400));
-    setIsLoading(false);
-    onNext();
+
+    try {
+      await updateSeeker({
+        current_title: currentRole,
+        years_experience: Number(yearsExperience),
+        background_summary: `Current/Recent company: ${company}`,
+        support_areas: skills
+          .split(',')
+          .map((skill) => skill.trim())
+          .filter(Boolean),
+      });
+
+      onNext();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save background');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const isComplete = currentRole && company && yearsExperience && skills;
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="text-center space-y-3">
         <h1 className="text-4xl font-light tracking-tight">
           Your Professional Background
@@ -39,10 +56,14 @@ export function StepBackground({ onNext, onPrevious }: StepBackgroundProps) {
         </p>
       </div>
 
-      {/* Form Card */}
       <Card className="border-border/40 bg-card/40 backdrop-blur-sm p-8 space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Current Role */}
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
+
           <div className="space-y-2">
             <label htmlFor="currentRole" className="block text-sm font-medium">
               Current Job Title
@@ -59,7 +80,6 @@ export function StepBackground({ onNext, onPrevious }: StepBackgroundProps) {
             />
           </div>
 
-          {/* Company */}
           <div className="space-y-2">
             <label htmlFor="company" className="block text-sm font-medium">
               Current Company
@@ -79,7 +99,6 @@ export function StepBackground({ onNext, onPrevious }: StepBackgroundProps) {
             </p>
           </div>
 
-          {/* Years of Experience */}
           <div className="space-y-2">
             <label htmlFor="yearsExperience" className="block text-sm font-medium">
               Years of Professional Experience
@@ -98,7 +117,6 @@ export function StepBackground({ onNext, onPrevious }: StepBackgroundProps) {
             />
           </div>
 
-          {/* Skills */}
           <div className="space-y-2">
             <label htmlFor="skills" className="block text-sm font-medium">
               Key Skills
@@ -118,7 +136,6 @@ export function StepBackground({ onNext, onPrevious }: StepBackgroundProps) {
             </p>
           </div>
 
-          {/* Navigation Buttons */}
           <div className="flex gap-3 pt-4">
             <Button
               type="button"
