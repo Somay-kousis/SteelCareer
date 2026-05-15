@@ -26,6 +26,7 @@ type Seeker = {
 
 export default function SeekerDashboard() {
   const [seeker, setSeeker] = useState<Seeker | null>(null);
+  const [requests, setRequests] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -34,6 +35,12 @@ export default function SeekerDashboard() {
       try {
         setIsLoading(true);
         const data = await fetchSeeker();
+setSeeker(data.seeker);
+
+const requestsRes = await fetch('/api/requests');
+const requestsData = await requestsRes.json();
+
+setRequests(requestsData.requests || []);
         setSeeker(data.seeker);
       } catch (err) {
         console.error('Failed to load seeker:', err);
@@ -370,9 +377,71 @@ export default function SeekerDashboard() {
                 <p className="text-sm text-muted-foreground">
                   Questions about your next steps? Our team is here to help.
                 </p>
-                <Button className="w-full rounded-full bg-accent text-accent-foreground hover:bg-accent/90 text-sm">
-                  Schedule a Call
-                </Button>
+<Card className="border-accent/40 bg-accent/5 backdrop-blur-sm p-6 space-y-4">
+  <div>
+    <h3 className="text-sm font-medium">
+      Consultation Request
+    </h3>
+
+    <p className="text-sm text-muted-foreground mt-1">
+      Connect with our team for guidance and onboarding help.
+    </p>
+  </div>
+
+  {requests.length > 0 ? (
+    <div className="space-y-2">
+      <p className="text-sm">
+        Latest Status:{' '}
+        <span className="text-accent">
+          {requests[0].status}
+        </span>
+      </p>
+
+      {requests[0].meeting_link && (
+        <a
+          href={requests[0].meeting_link}
+          target="_blank"
+          rel="noreferrer"
+          className="text-sm text-accent underline"
+        >
+          Join Meeting
+        </a>
+      )}
+    </div>
+  ) : (
+    <Button
+      onClick={async () => {
+        try {
+          const response = await fetch('/api/requests', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              request_type: 'schedule_call',
+              message: 'Seeker requested a consultation call.',
+            }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            alert(data.error || 'Failed to create request');
+            return;
+          }
+
+          location.reload();
+        } catch (error) {
+          console.error(error);
+          alert('Something went wrong');
+        }
+      }}
+      className="w-full rounded-full bg-accent text-accent-foreground hover:bg-accent/90 text-sm"
+    >
+      Schedule a Call
+    </Button>
+  )}
+</Card>
               </Card>
             </div>
           </div>
