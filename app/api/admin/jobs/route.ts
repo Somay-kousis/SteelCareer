@@ -1,12 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET() {
   try {
-    const { id } = await params;
     const supabase = await createClient();
 
     const {
@@ -28,22 +24,33 @@ export async function GET(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { data: job, error } = await supabase
+    const { data: jobs, error } = await supabase
       .from('job_postings')
       .select(`
-        *,
-        provider:providers(*)
+        id,
+        title,
+        description,
+        requirements,
+        salary_range,
+        location,
+        job_type,
+        is_active,
+        created_at,
+        provider:providers(
+          id,
+          company_name,
+          contact_email
+        )
       `)
-      .eq('id', id)
-      .maybeSingle();
+      .order('created_at', { ascending: false });
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json({ job });
+    return NextResponse.json({ jobs: jobs || [] });
   } catch (error) {
-    console.error('[admin job detail] error:', error);
+    console.error('[admin jobs] error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
