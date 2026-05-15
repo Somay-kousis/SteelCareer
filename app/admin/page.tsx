@@ -5,7 +5,12 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 
-type Tab = 'overview' | 'seekers' | 'providers' | 'jobs';
+type Tab =
+  | 'overview'
+  | 'seekers'
+  | 'providers'
+  | 'jobs'
+  | 'requests';
 
 export default function AdminWorkspace() {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -14,27 +19,34 @@ export default function AdminWorkspace() {
   const [seekers, setSeekers] = useState<any[]>([]);
   const [providers, setProviders] = useState<any[]>([]);
   const [jobs, setJobs] = useState<any[]>([]);
+  const [requests, setRequests] = useState<any[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadAdminData = async () => {
       try {
-        const [seekersRes, providersRes, jobsRes] =
-          await Promise.all([
-            fetch('/api/admin/seekers'),
-            fetch('/api/admin/providers'),
-            fetch('/api/admin/jobs'),
-          ]);
+        const [
+          seekersRes,
+          providersRes,
+          jobsRes,
+          requestsRes,
+        ] = await Promise.all([
+          fetch('/api/admin/seekers'),
+          fetch('/api/admin/providers'),
+          fetch('/api/admin/jobs'),
+          fetch('/api/admin/requests'),
+        ]);
 
         const seekersData = await seekersRes.json();
         const providersData = await providersRes.json();
         const jobsData = await jobsRes.json();
+        const requestsData = await requestsRes.json();
 
         setSeekers(seekersData.seekers || []);
         setProviders(providersData.providers || []);
         setJobs(jobsData.jobs || []);
-
+        setRequests(requestsData.requests || []);
       } catch (error) {
         console.error(error);
       } finally {
@@ -92,7 +104,7 @@ export default function AdminWorkspace() {
             </h1>
 
             <p className="text-muted-foreground mt-2">
-              Manage seekers, providers, and job postings
+              Manage seekers, providers, jobs, and requests
             </p>
           </div>
 
@@ -107,7 +119,7 @@ export default function AdminWorkspace() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
 
           <Card className="border-border/40 bg-card/40 backdrop-blur-sm p-6">
             <p className="text-sm text-muted-foreground">
@@ -131,7 +143,7 @@ export default function AdminWorkspace() {
 
           <Card className="border-border/40 bg-card/40 backdrop-blur-sm p-6">
             <p className="text-sm text-muted-foreground">
-              Jobs Posted
+              Jobs
             </p>
 
             <p className="text-3xl font-light mt-2">
@@ -149,11 +161,29 @@ export default function AdminWorkspace() {
             </p>
           </Card>
 
+          <Card className="border-border/40 bg-card/40 backdrop-blur-sm p-6">
+            <p className="text-sm text-muted-foreground">
+              Requests
+            </p>
+
+            <p className="text-3xl font-light mt-2">
+              {requests.length}
+            </p>
+          </Card>
+
         </div>
 
         <div className="flex flex-wrap gap-3">
 
-          {(['overview', 'seekers', 'providers', 'jobs'] as Tab[]).map((tab) => (
+          {(
+            [
+              'overview',
+              'seekers',
+              'providers',
+              'jobs',
+              'requests',
+            ] as Tab[]
+          ).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -252,23 +282,23 @@ export default function AdminWorkspace() {
                     </p>
                   </div>
 
-<div className="text-right space-y-2">
-  <div>
-    <p className="text-sm">
-      {seeker.status || 'pending'}
-    </p>
+                  <div className="text-right space-y-2">
+                    <div>
+                      <p className="text-sm">
+                        {seeker.status || 'pending'}
+                      </p>
 
-    <p className="text-xs text-muted-foreground">
-      {seeker.years_experience || 0} yrs exp
-    </p>
-  </div>
+                      <p className="text-xs text-muted-foreground">
+                        {seeker.years_experience || 0} yrs exp
+                      </p>
+                    </div>
 
-  <Link href={`/admin/seekers/${seeker.id}`}>
-    <button className="text-sm text-accent hover:underline">
-      View Details
-    </button>
-  </Link>
-</div>
+                    <Link href={`/admin/seekers/${seeker.id}`}>
+                      <button className="text-sm text-accent hover:underline">
+                        View Details
+                      </button>
+                    </Link>
+                  </div>
                 </div>
               </Card>
             ))}
@@ -297,17 +327,17 @@ export default function AdminWorkspace() {
                     </p>
                   </div>
 
-<div className="text-right space-y-2">
-  <p className="text-sm">
-    {provider.verified ? 'Verified' : 'Pending'}
-  </p>
+                  <div className="text-right space-y-2">
+                    <p className="text-sm">
+                      {provider.verified ? 'Verified' : 'Pending'}
+                    </p>
 
-  <Link href={`/admin/providers/${provider.id}`}>
-    <button className="text-sm text-accent hover:underline">
-      View Details
-    </button>
-  </Link>
-</div>
+                    <Link href={`/admin/providers/${provider.id}`}>
+                      <button className="text-sm text-accent hover:underline">
+                        View Details
+                      </button>
+                    </Link>
+                  </div>
                 </div>
               </Card>
             ))}
@@ -335,17 +365,109 @@ export default function AdminWorkspace() {
                       {job.location} • {job.job_type}
                     </p>
                   </div>
-<div className="text-right space-y-2">
-  <p className="text-sm">
-    {job.is_active ? 'Active' : 'Inactive'}
-  </p>
 
-  <Link href={`/admin/jobs/${job.id}`}>
-    <button className="text-sm text-accent hover:underline">
-      View Details
+                  <div className="text-right space-y-2">
+                    <p className="text-sm">
+                      {job.is_active ? 'Active' : 'Inactive'}
+                    </p>
+
+                    <Link href={`/admin/jobs/${job.id}`}>
+                      <button className="text-sm text-accent hover:underline">
+                        View Details
+                      </button>
+                    </Link>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {activeTab === 'requests' && (
+          <div className="space-y-4">
+            {requests.map((request) => (
+              <Card
+                key={request.id}
+                className="border-border/40 bg-card/40 backdrop-blur-sm p-6"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium">
+                      {request.request_type}
+                    </h3>
+
+                    <p className="text-sm text-muted-foreground">
+                      {request.requester_role}
+                    </p>
+
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {request.message || 'No message'}
+                    </p>
+                  </div>
+
+                  <div className="text-right space-y-2">
+                    <p className="text-sm">
+                      {request.status}
+                    </p>
+
+                    <div className="space-y-3">
+  <input
+    type="text"
+    placeholder="Meeting link (optional)"
+    id={`meeting-${request.id}`}
+    className="w-full rounded-lg border border-border/40 bg-background px-3 py-2 text-xs"
+  />
+
+  <div className="flex gap-2 justify-end">
+    <button
+      onClick={async () => {
+        const meetingLink = (
+          document.getElementById(
+            `meeting-${request.id}`
+          ) as HTMLInputElement
+        )?.value;
+
+        await fetch('/api/admin/requests', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: request.id,
+            request_status: 'approved',
+            meeting_link: meetingLink || null,
+          }),
+        });
+
+        location.reload();
+      }}
+      className="text-xs text-accent hover:underline"
+    >
+      Approve
     </button>
-  </Link>
+
+    <button
+      onClick={async () => {
+        await fetch('/api/admin/requests', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: request.id,
+            request_status: 'rejected',
+          }),
+        });
+
+        location.reload();
+      }}
+      className="text-xs text-red-400 hover:underline"
+    >
+      Reject
+    </button>
+  </div>
 </div>
+                  </div>
                 </div>
               </Card>
             ))}
