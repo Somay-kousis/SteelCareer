@@ -5,6 +5,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { fetchSeeker } from '@/lib/api';
+import { motion } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 
 type Seeker = {
   first_name?: string | null;
@@ -22,6 +24,11 @@ type Seeker = {
   cover_letter_url?: string | null;
   support_areas?: string[] | null;
   onboarding_completed_at?: string | null;
+  legal_status?: string | null;
+  work_authorization?: string | null;
+  highest_education?: string | null;
+  current_location?: string | null;
+  preferred_screening_platform?: string | null;
 };
 
 export default function SeekerDashboard() {
@@ -35,13 +42,11 @@ export default function SeekerDashboard() {
       try {
         setIsLoading(true);
         const data = await fetchSeeker();
-setSeeker(data.seeker);
-
-const requestsRes = await fetch('/api/requests');
-const requestsData = await requestsRes.json();
-
-setRequests(requestsData.requests || []);
         setSeeker(data.seeker);
+
+        const requestsRes = await fetch('/api/requests');
+        const requestsData = await requestsRes.json();
+        setRequests(requestsData.requests || []);
       } catch (err) {
         console.error('Failed to load seeker:', err);
         setError(err instanceof Error ? err.message : 'Failed to load dashboard');
@@ -61,12 +66,11 @@ setRequests(requestsData.requests || []);
       seeker.last_name,
       seeker.email,
       seeker.phone,
-      seeker.current_title,
-      seeker.years_experience,
-      seeker.target_roles?.length,
-      seeker.linkedin_profile || seeker.github_profile || seeker.website_url,
-      seeker.resume_url,
-      seeker.support_areas?.length,
+      seeker.legal_status,
+      seeker.work_authorization,
+      seeker.highest_education,
+      seeker.current_location,
+      seeker.preferred_screening_platform,
     ];
 
     const filled = fields.filter(Boolean).length;
@@ -79,8 +83,9 @@ setRequests(requestsData.requests || []);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-sm text-muted-foreground">Loading your dashboard...</p>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="w-8 h-8 animate-spin text-accent" />
+        <p className="text-sm text-muted-foreground animate-pulse">Loading your dashboard...</p>
       </div>
     );
   }
@@ -88,11 +93,11 @@ setRequests(requestsData.requests || []);
   if (error) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-6">
-        <Card className="max-w-md w-full border-border/40 bg-card/40 backdrop-blur-sm p-8 space-y-4 text-center">
+        <Card className="max-w-md w-full border-border/40 bg-card/40 backdrop-blur-sm p-8 space-y-4 text-center shadow-xl">
           <h1 className="text-xl font-light">Couldn&apos;t load dashboard</h1>
           <p className="text-sm text-muted-foreground">{error}</p>
-          <Link href="/signin">
-            <Button className="rounded-full bg-accent text-accent-foreground">
+          <Link href="/auth/signin">
+            <Button className="rounded-full bg-accent text-accent-foreground mt-4">
               Sign in again
             </Button>
           </Link>
@@ -102,12 +107,17 @@ setRequests(requestsData.requests || []);
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.08] via-transparent to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-tl from-accent/[0.05] via-transparent to-transparent" />
+    <div className="min-h-screen bg-background overflow-hidden relative">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-accent/20 via-background to-background" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-accent/10 via-transparent to-transparent" />
 
       <div className="relative z-10">
-        <div className="sticky top-0 z-40 border-b border-border/40 bg-background/80 backdrop-blur-sm">
+        <motion.div 
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="sticky top-0 z-40 border-b border-border/20 bg-background/40 backdrop-blur-md"
+        >
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-light tracking-tight">
@@ -119,330 +129,278 @@ setRequests(requestsData.requests || []);
             </div>
 
             <Link href="/seeker/onboarding/steps/1">
-              <Button className="rounded-full bg-accent text-accent-foreground hover:bg-accent/90">
+              <Button className="rounded-full shadow-sm bg-accent text-accent-foreground hover:bg-accent/90 transition-all">
                 Edit Profile
               </Button>
             </Link>
           </div>
-        </div>
+        </motion.div>
 
         <div className="max-w-7xl mx-auto px-6 py-12 space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="border-border/40 bg-card/40 backdrop-blur-sm p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium">Profile Completion</h3>
-                <span className="text-lg text-accent">{completion}%</span>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
+              <Card className="border-border/40 bg-card/60 backdrop-blur-sm p-6 space-y-4 shadow-lg hover:shadow-xl transition-all">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium">Profile Completion</h3>
+                  <span className="text-lg text-accent font-medium">{completion}%</span>
+                </div>
 
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-accent transition-all duration-500"
-                  style={{ width: `${completion}%` }}
-                />
-              </div>
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-accent transition-all duration-1000 ease-out"
+                    style={{ width: `${completion}%` }}
+                  />
+                </div>
 
-              <p className="text-xs text-muted-foreground">
-                {isComplete
-                  ? 'Your profile is complete and ready for review'
-                  : 'Complete onboarding to improve your match quality'}
-              </p>
-            </Card>
+                <p className="text-xs text-muted-foreground">
+                  {isComplete
+                    ? 'Your profile is complete and ready for review'
+                    : 'Complete onboarding to improve your match quality'}
+                </p>
+              </Card>
+            </motion.div>
 
-            <Card className="border-border/40 bg-card/40 backdrop-blur-sm p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium">Review Status</h3>
-                <span className="text-sm text-accent">
-                  {isComplete ? 'In Progress' : 'Incomplete'}
-                </span>
-              </div>
+            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
+              <Card className="border-border/40 bg-card/60 backdrop-blur-sm p-6 space-y-4 shadow-lg hover:shadow-xl transition-all h-full">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium">Review Status</h3>
+                  <span className="text-sm text-accent bg-accent/10 px-2 py-1 rounded-full">
+                    {isComplete ? 'In Progress' : 'Incomplete'}
+                  </span>
+                </div>
 
-              <p className="text-sm">
-                {isComplete
-                  ? 'Our team is reviewing your profile'
-                  : 'Finish onboarding to enter review'}
-              </p>
+                <p className="text-sm">
+                  {isComplete
+                    ? 'Our team is reviewing your profile'
+                    : 'Finish onboarding to enter review'}
+                </p>
 
-              <p className="text-xs text-muted-foreground">
-                {isComplete
-                  ? 'You&apos;ll hear from us within 2-3 business days'
-                  : 'Your profile is saved as you progress'}
-              </p>
-            </Card>
+                <p className="text-xs text-muted-foreground">
+                  {isComplete
+                    ? 'You&apos;ll hear from us within 2-3 business days'
+                    : 'Your profile is saved as you progress'}
+                </p>
+              </Card>
+            </motion.div>
 
-            <Card className="border-border/40 bg-card/40 backdrop-blur-sm p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium">Opportunities</h3>
-                <span className="text-lg text-accent">0</span>
-              </div>
-
-              <p className="text-xs text-muted-foreground">
-                Waiting for matches from providers
-              </p>
-
-              <Button variant="outline" className="w-full rounded-lg border-border/40 text-xs">
-                View All
-              </Button>
-            </Card>
+            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }}>
+              <Card className="border-border/40 bg-card/60 backdrop-blur-sm p-6 space-y-4 shadow-lg hover:shadow-xl transition-all h-full flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-medium">Opportunities</h3>
+                    <span className="text-lg text-accent font-medium">0</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-4">
+                    Waiting for matches from providers
+                  </p>
+                </div>
+                <Button variant="outline" className="w-full rounded-full border-border/40 text-xs mt-4 hover:bg-card">
+                  View All
+                </Button>
+              </Card>
+            </motion.div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              <Card className="border-border/40 bg-card/40 backdrop-blur-sm p-8 space-y-6">
-                <div>
-                  <h2 className="text-xl font-light tracking-tight">Profile Snapshot</h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Your current information from onboarding
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div className="rounded-lg border border-border/40 bg-card/20 p-4">
-                    <p className="text-xs text-muted-foreground">Name</p>
-                    <p className="font-medium mt-1">{fullName}</p>
-                  </div>
-
-                  <div className="rounded-lg border border-border/40 bg-card/20 p-4">
-                    <p className="text-xs text-muted-foreground">Email</p>
-                    <p className="font-medium mt-1">{seeker?.email || 'Not added'}</p>
-                  </div>
-
-                  <div className="rounded-lg border border-border/40 bg-card/20 p-4">
-                    <p className="text-xs text-muted-foreground">Phone</p>
-                    <p className="font-medium mt-1">{seeker?.phone || 'Not added'}</p>
-                  </div>
-
-                  <div className="rounded-lg border border-border/40 bg-card/20 p-4">
-                    <p className="text-xs text-muted-foreground">Experience</p>
-                    <p className="font-medium mt-1">
-                      {seeker?.years_experience != null
-                        ? `${seeker.years_experience} years`
-                        : 'Not added'}
+              <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }}>
+                <Card className="border-border/40 bg-card/60 backdrop-blur-sm p-8 space-y-6 shadow-lg">
+                  <div>
+                    <h2 className="text-xl font-light tracking-tight">Profile Snapshot</h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Your current information from onboarding
                     </p>
                   </div>
 
-                  <div className="rounded-lg border border-border/40 bg-card/20 p-4 md:col-span-2">
-                    <p className="text-xs text-muted-foreground">Target Roles / Goals</p>
-                    <p className="font-medium mt-1">
-                      {seeker?.target_roles?.length
-                        ? seeker.target_roles.join(', ')
-                        : 'Not added'}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div className="rounded-lg border border-border/40 bg-card/40 p-4">
+                      <p className="text-xs text-muted-foreground">Name</p>
+                      <p className="font-medium mt-1">{fullName}</p>
+                    </div>
+
+                    <div className="rounded-lg border border-border/40 bg-card/40 p-4">
+                      <p className="text-xs text-muted-foreground">Email</p>
+                      <p className="font-medium mt-1">{seeker?.email || 'Not added'}</p>
+                    </div>
+
+                    <div className="rounded-lg border border-border/40 bg-card/40 p-4">
+                      <p className="text-xs text-muted-foreground">Location</p>
+                      <p className="font-medium mt-1">{seeker?.current_location || 'Not added'}</p>
+                    </div>
+
+                    <div className="rounded-lg border border-border/40 bg-card/40 p-4">
+                      <p className="text-xs text-muted-foreground">Experience</p>
+                      <p className="font-medium mt-1">
+                        {seeker?.years_experience != null
+                          ? `${seeker.years_experience} years`
+                          : 'Not added'}
+                      </p>
+                    </div>
+
+                    <div className="rounded-lg border border-border/40 bg-card/40 p-4 md:col-span-2">
+                      <p className="text-xs text-muted-foreground">Work Authorization</p>
+                      <p className="font-medium mt-1 capitalize">
+                        {seeker?.work_authorization ? seeker.work_authorization.replace('_', ' ') : 'Not added'}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+
+              <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }}>
+                <Card className="border-border/40 bg-card/60 backdrop-blur-sm p-8 space-y-6 shadow-lg">
+                  <div>
+                    <h2 className="text-xl font-light tracking-tight">What&apos;s Next?</h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Here&apos;s what we recommend to maximize your opportunities
                     </p>
                   </div>
-                </div>
-              </Card>
 
-              <Card className="border-border/40 bg-card/40 backdrop-blur-sm p-8 space-y-6">
-                <div>
-                  <h2 className="text-xl font-light tracking-tight">What&apos;s Next?</h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Here&apos;s what we recommend to maximize your opportunities
-                  </p>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-start gap-4 p-4 rounded-lg border border-border/40 bg-card/20">
-                    <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs text-accent">✓</span>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-4 p-4 rounded-lg border border-border/40 bg-card/40 transition-colors hover:bg-card/60">
+                      <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-xs text-accent">✓</span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">Profile Created</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Your profile exists and is saved in the system.
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">Profile Created</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Your profile exists and is saved in the system.
-                      </p>
+
+                    <div className="flex items-start gap-4 p-4 rounded-lg border border-border/40 bg-card/40 transition-colors hover:bg-card/60">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${isComplete ? 'bg-accent/20' : 'bg-muted'}`}>
+                        <span className={`text-xs ${isComplete ? 'text-accent' : 'text-muted-foreground'}`}>{isComplete ? '✓' : '2'}</span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">Onboarding Submitted</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {isComplete
+                            ? 'Your profile is ready to be reviewed.'
+                            : 'Complete onboarding to begin review.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-4 p-4 rounded-lg border border-border/40 bg-card/40 transition-colors hover:bg-card/60">
+                      <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-xs text-muted-foreground">3</span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">Team Review</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Our team will review your profile and prepare matches.
+                        </p>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="flex items-start gap-4 p-4 rounded-lg border border-border/40 bg-card/20">
-                    <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs text-accent">{isComplete ? '✓' : '2'}</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">Onboarding Submitted</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {isComplete
-                          ? 'Your profile is ready to be reviewed.'
-                          : 'Complete onboarding to begin review.'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4 p-4 rounded-lg border border-border/40 bg-card/20">
-                    <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs text-muted-foreground">3</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">Team Review</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Our team will review your profile and prepare matches.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </Card>
+                </Card>
+              </motion.div>
             </div>
 
             <div className="space-y-6">
-              <Card className="border-border/40 bg-card/40 backdrop-blur-sm p-6 space-y-3">
-                <h3 className="text-sm font-medium">Documents</h3>
-
-                <div className="space-y-2 text-sm">
-                  <p className="text-muted-foreground">
-                    Resume:{' '}
-                    <span className={seeker?.resume_url ? 'text-accent' : ''}>
-                      {seeker?.resume_url ? 'Uploaded' : 'Missing'}
-                    </span>
-                  </p>
-
-                  <p className="text-muted-foreground">
-                    Cover letter:{' '}
-                    <span className={seeker?.cover_letter_url ? 'text-accent' : ''}>
-                      {seeker?.cover_letter_url ? 'Uploaded' : 'Optional'}
-                    </span>
-                  </p>
-                </div>
-
-                <Link href="/seeker/onboarding/steps/5">
-                  <Button variant="outline" className="w-full rounded-lg border-border/40 text-xs">
-                    Manage Documents
-                  </Button>
-                </Link>
-              </Card>
-
-              <Card className="border-border/40 bg-card/40 backdrop-blur-sm p-6 space-y-3">
-                <h3 className="text-sm font-medium">Support Requested</h3>
-
-                {seeker?.support_areas?.length ? (
-                  <div className="flex flex-wrap gap-2">
-                    {seeker.support_areas.map((area) => (
-                      <span
-                        key={area}
-                        className="rounded-full border border-border/40 bg-card/30 px-3 py-1 text-xs text-muted-foreground"
+              <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.4 }}>
+                <Card className="border-border/40 bg-card/60 backdrop-blur-sm p-6 space-y-4 shadow-lg">
+                  <h3 className="text-sm font-medium">Quick Links</h3>
+                  <div className="space-y-2">
+                    {seeker?.linkedin_profile && (
+                      <a
+                        href={seeker.linkedin_profile}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors p-2 rounded-md hover:bg-card/80"
                       >
-                        {area}
-                      </span>
-                    ))}
+                        <span>→</span> LinkedIn Profile
+                      </a>
+                    )}
+
+                    {seeker?.github_profile && (
+                      <a
+                        href={seeker.github_profile}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors p-2 rounded-md hover:bg-card/80"
+                      >
+                        <span>→</span> GitHub Profile
+                      </a>
+                    )}
+
+                    {!seeker?.linkedin_profile && !seeker?.github_profile && (
+                      <p className="text-sm text-muted-foreground p-2">
+                        No external links added.
+                      </p>
+                    )}
                   </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    No support preferences selected yet.
-                  </p>
-                )}
-              </Card>
+                </Card>
+              </motion.div>
 
-              <Card className="border-border/40 bg-card/40 backdrop-blur-sm p-6 space-y-3">
-                <h3 className="text-sm font-medium">Quick Links</h3>
-                <div className="space-y-2">
-                  {seeker?.linkedin_profile && (
-                    <a
-                      href={seeker.linkedin_profile}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <span>→</span> LinkedIn
-                    </a>
-                  )}
-
-                  {seeker?.github_profile && (
-                    <a
-                      href={seeker.github_profile}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <span>→</span> GitHub
-                    </a>
-                  )}
-
-                  {seeker?.website_url && (
-                    <a
-                      href={seeker.website_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <span>→</span> Portfolio
-                    </a>
-                  )}
-
-                  {!seeker?.linkedin_profile && !seeker?.github_profile && !seeker?.website_url && (
-                    <p className="text-sm text-muted-foreground">
-                      No profile links added yet.
+              <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.5 }}>
+                <Card className="border-emerald-500/20 bg-emerald-500/5 backdrop-blur-sm p-6 space-y-4 shadow-lg">
+                  <div>
+                    <h3 className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                      Consultation Call
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Connect with our team for guidance and screening.
                     </p>
+                  </div>
+
+                  {requests.length > 0 ? (
+                    <div className="space-y-3 bg-card/40 p-3 rounded-lg border border-border/40">
+                      <p className="text-sm">
+                        Status:{' '}
+                        <span className="text-accent font-medium">
+                          {requests[0].status}
+                        </span>
+                      </p>
+
+                      {requests[0].meeting_link && (
+                        <a
+                          href={requests[0].meeting_link}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block text-center text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 transition-colors rounded-full py-2"
+                        >
+                          Join Meeting
+                        </a>
+                      )}
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={async () => {
+                        try {
+                          const response = await fetch('/api/requests', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                              request_type: 'schedule_call',
+                              message: 'Seeker requested a consultation call.',
+                            }),
+                          });
+
+                          const data = await response.json();
+
+                          if (!response.ok) {
+                            alert(data.error || 'Failed to create request');
+                            return;
+                          }
+
+                          location.reload();
+                        } catch (error) {
+                          console.error(error);
+                          alert('Something went wrong');
+                        }
+                      }}
+                      className="w-full rounded-full bg-emerald-600 text-white hover:bg-emerald-700 text-sm shadow-sm"
+                    >
+                      Schedule Call
+                    </Button>
                   )}
-                </div>
-              </Card>
-
-              <Card className="border-accent/40 bg-accent/5 backdrop-blur-sm p-6 space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  Questions about your next steps? Our team is here to help.
-                </p>
-<Card className="border-accent/40 bg-accent/5 backdrop-blur-sm p-6 space-y-4">
-  <div>
-    <h3 className="text-sm font-medium">
-      Consultation Request
-    </h3>
-
-    <p className="text-sm text-muted-foreground mt-1">
-      Connect with our team for guidance and onboarding help.
-    </p>
-  </div>
-
-  {requests.length > 0 ? (
-    <div className="space-y-2">
-      <p className="text-sm">
-        Latest Status:{' '}
-        <span className="text-accent">
-          {requests[0].status}
-        </span>
-      </p>
-
-      {requests[0].meeting_link && (
-        <a
-          href={requests[0].meeting_link}
-          target="_blank"
-          rel="noreferrer"
-          className="text-sm text-accent underline"
-        >
-          Join Meeting
-        </a>
-      )}
-    </div>
-  ) : (
-    <Button
-      onClick={async () => {
-        try {
-          const response = await fetch('/api/requests', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              request_type: 'schedule_call',
-              message: 'Seeker requested a consultation call.',
-            }),
-          });
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            alert(data.error || 'Failed to create request');
-            return;
-          }
-
-          location.reload();
-        } catch (error) {
-          console.error(error);
-          alert('Something went wrong');
-        }
-      }}
-      className="w-full rounded-full bg-accent text-accent-foreground hover:bg-accent/90 text-sm"
-    >
-      Schedule a Call
-    </Button>
-  )}
-</Card>
-              </Card>
+                </Card>
+              </motion.div>
             </div>
           </div>
         </div>

@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
 import { updateProvider } from '@/lib/api';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ProviderOnboarding() {
   const router = useRouter();
@@ -21,6 +23,11 @@ export default function ProviderOnboarding() {
     description: '',
     linkedinUrl: '',
     contactPhone: '',
+    hiringRoles: '',
+    hiringVolume: '',
+    preferredExperience: '',
+    workAuthReqs: '',
+    remotePolicy: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -63,6 +70,11 @@ export default function ProviderOnboarding() {
         contact_email: formData.email,
         contact_phone: formData.contactPhone || null,
         linkedin_url: formData.linkedinUrl || null,
+        hiring_roles: splitList(formData.hiringRoles),
+        hiring_volume: formData.hiringVolume || null,
+        preferred_candidate_experience: formData.preferredExperience || null,
+        work_authorization_requirements: formData.workAuthReqs || null,
+        remote_policy: formData.remotePolicy || null,
       });
 
       router.push('/provider/job-posting');
@@ -73,96 +85,107 @@ export default function ProviderOnboarding() {
     }
   };
 
-  if (step === 'type') {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.08] via-transparent to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-tl from-accent/[0.05] via-transparent to-transparent" />
-
-        <div className="relative z-10 max-w-2xl mx-auto px-6 space-y-8 py-12">
-          <div className="text-center space-y-3">
-            <h1 className="text-5xl font-light tracking-tight">
-              Welcome to Steelcareer
-            </h1>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Connect with pre-screened international talent
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card
-              onClick={() => handleTypeSelect('recruiter')}
-              className="relative group cursor-pointer border-border/40 bg-card/40 backdrop-blur-sm hover:bg-card/60 hover:border-border/60 transition-all duration-300 overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.1] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative p-8 space-y-4">
-                <div className="text-3xl">👤</div>
-                <h3 className="text-xl font-light tracking-tight">
-                  Recruiting Professional
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  I&apos;m an independent recruiter or agency looking to source talent.
-                </p>
-                <div className="flex items-center gap-2 text-sm text-accent font-medium pt-4">
-                  <span>→</span>
-                  <span>Continue</span>
-                </div>
-              </div>
-            </Card>
-
-            <Card
-              onClick={() => handleTypeSelect('company')}
-              className="relative group cursor-pointer border-border/40 bg-card/40 backdrop-blur-sm hover:bg-card/60 hover:border-border/60 transition-all duration-300 overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.1] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative p-8 space-y-4">
-                <div className="text-3xl">🏢</div>
-                <h3 className="text-xl font-light tracking-tight">
-                  Company / Organization
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  I&apos;m hiring on behalf of a company.
-                </p>
-                <div className="flex items-center gap-2 text-sm text-accent font-medium pt-4">
-                  <span>→</span>
-                  <span>Continue</span>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          <p className="text-center text-xs text-muted-foreground">
-            Operations access is provisioned internally. Providers continue here.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-background relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-accent/[0.08] via-transparent to-transparent" />
+    <div className="min-h-screen bg-background flex items-center justify-center relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-accent/10 via-background to-background" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-accent/5 via-transparent to-transparent" />
 
-      <div className="relative z-10 flex items-center justify-center min-h-screen p-6">
-        <div className="max-w-2xl w-full space-y-8">
-          <div className="text-center space-y-3">
-            <h1 className="text-4xl font-light tracking-tight">
-              {providerType === 'recruiter'
-                ? 'Set Up Your Recruiter Profile'
-                : 'Set Up Your Company Profile'}
-            </h1>
-            <p className="text-muted-foreground">
-              Tell us who you hire for and where you’re hiring.
-            </p>
-          </div>
+      <AnimatePresence mode="wait">
+        {step === 'type' ? (
+          <motion.div 
+            key="type-step"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.4 }}
+            className="relative z-10 max-w-3xl w-full mx-auto px-6 space-y-12 py-12"
+          >
+            <div className="text-center space-y-4">
+              <h1 className="text-5xl md:text-6xl font-light tracking-tight">
+                Welcome to Steelcareer
+              </h1>
+              <p className="text-lg text-muted-foreground max-w-md mx-auto">
+                Connect with pre-screened international talent.
+              </p>
+            </div>
 
-          <Card className="border-border/40 bg-card/40 backdrop-blur-sm p-8 space-y-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {error && (
-                <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-3 text-sm text-destructive">
-                  {error}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card
+                onClick={() => handleTypeSelect('recruiter')}
+                className="relative group cursor-pointer border-border/40 bg-card/60 backdrop-blur-sm hover:-translate-y-1 hover:shadow-2xl hover:border-accent/40 transition-all duration-300 overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative p-10 space-y-6">
+                  <div className="text-4xl bg-accent/10 w-16 h-16 rounded-2xl flex items-center justify-center">👤</div>
+                  <div>
+                    <h3 className="text-2xl font-light tracking-tight mb-2">
+                      Recruiting Professional
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      I&apos;m an independent recruiter or agency looking to source talent.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-accent font-medium pt-4 group-hover:translate-x-1 transition-transform">
+                    <span>Continue</span>
+                    <span>→</span>
+                  </div>
                 </div>
-              )}
+              </Card>
+
+              <Card
+                onClick={() => handleTypeSelect('company')}
+                className="relative group cursor-pointer border-border/40 bg-card/60 backdrop-blur-sm hover:-translate-y-1 hover:shadow-2xl hover:border-accent/40 transition-all duration-300 overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative p-10 space-y-6">
+                  <div className="text-4xl bg-accent/10 w-16 h-16 rounded-2xl flex items-center justify-center">🏢</div>
+                  <div>
+                    <h3 className="text-2xl font-light tracking-tight mb-2">
+                      Company / Organization
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      I&apos;m hiring on behalf of a company.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-accent font-medium pt-4 group-hover:translate-x-1 transition-transform">
+                    <span>Continue</span>
+                    <span>→</span>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            <p className="text-center text-xs text-muted-foreground/60">
+              Operations access is provisioned internally. Providers continue here.
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div 
+            key="info-step"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+            className="relative z-10 w-full max-w-2xl px-6 py-12 pb-24 mx-auto space-y-8"
+          >
+            <div className="text-center space-y-3">
+              <h1 className="text-4xl font-light tracking-tight">
+                {providerType === 'recruiter'
+                  ? 'Set Up Your Recruiter Profile'
+                  : 'Set Up Your Company Profile'}
+              </h1>
+              <p className="text-muted-foreground">
+                Tell us who you hire for and where you’re hiring.
+              </p>
+            </div>
+
+            <Card className="border-border/40 bg-card/60 backdrop-blur-sm p-8 space-y-6 shadow-xl">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {error && (
+                  <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 text-sm text-destructive flex items-center gap-2">
+                    <span className="shrink-0">⚠️</span> {error}
+                  </div>
+                )}
 
               <div className="space-y-2">
                 <label htmlFor="name" className="block text-sm font-medium">
@@ -281,17 +304,132 @@ export default function ProviderOnboarding() {
                   <label htmlFor="companySize" className="block text-sm font-medium">
                     Company Size
                   </label>
-                  <Input
-                    id="companySize"
-                    type="text"
-                    placeholder="e.g., 11-50, 51-200, 1000+"
+                  <Select
+                    name="companySize"
                     value={formData.companySize}
-                    onChange={(e) => handleInputChange('companySize', e.target.value)}
+                    onValueChange={(value) => handleInputChange('companySize', value)}
                     disabled={isLoading}
-                    className="bg-input border-border/40"
-                  />
+                  >
+                    <SelectTrigger id="companySize" className="bg-input border-border/40">
+                      <SelectValue placeholder="Select company size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1-10">1-10 employees</SelectItem>
+                      <SelectItem value="11-50">11-50 employees</SelectItem>
+                      <SelectItem value="51-200">51-200 employees</SelectItem>
+                      <SelectItem value="201-1000">201-1000 employees</SelectItem>
+                      <SelectItem value="1000+">1000+ employees</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
+
+              <div className="space-y-2">
+                <label htmlFor="hiringRoles" className="block text-sm font-medium">
+                  Primary Roles Hiring For
+                </label>
+                <Input
+                  id="hiringRoles"
+                  type="text"
+                  placeholder="e.g., Software Engineer, Data Scientist"
+                  value={formData.hiringRoles}
+                  onChange={(e) => handleInputChange('hiringRoles', e.target.value)}
+                  disabled={isLoading}
+                  className="bg-input border-border/40"
+                />
+                <p className="text-xs text-muted-foreground">Separate roles with commas.</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="hiringVolume" className="block text-sm font-medium">
+                    Hiring Volume (Yearly)
+                  </label>
+                  <Select
+                    name="hiringVolume"
+                    value={formData.hiringVolume}
+                    onValueChange={(value) => handleInputChange('hiringVolume', value)}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger id="hiringVolume" className="bg-input border-border/40">
+                      <SelectValue placeholder="Select volume" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1-5">1-5 hires</SelectItem>
+                      <SelectItem value="6-20">6-20 hires</SelectItem>
+                      <SelectItem value="21-50">21-50 hires</SelectItem>
+                      <SelectItem value="50+">50+ hires</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="preferredExperience" className="block text-sm font-medium">
+                    Preferred Candidate Level
+                  </label>
+                  <Select
+                    name="preferredExperience"
+                    value={formData.preferredExperience}
+                    onValueChange={(value) => handleInputChange('preferredExperience', value)}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger id="preferredExperience" className="bg-input border-border/40">
+                      <SelectValue placeholder="Select level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Junior">Junior</SelectItem>
+                      <SelectItem value="Mid-Level">Mid-Level</SelectItem>
+                      <SelectItem value="Senior">Senior</SelectItem>
+                      <SelectItem value="Lead/Manager">Lead/Manager</SelectItem>
+                      <SelectItem value="Any">Any Level</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="workAuthReqs" className="block text-sm font-medium">
+                    Work Authorization
+                  </label>
+                  <Select
+                    name="workAuthReqs"
+                    value={formData.workAuthReqs}
+                    onValueChange={(value) => handleInputChange('workAuthReqs', value)}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger id="workAuthReqs" className="bg-input border-border/40">
+                      <SelectValue placeholder="Select requirements" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="US Citizen/Green Card">US Citizen / Green Card only</SelectItem>
+                      <SelectItem value="Visa Sponsorship Available">Visa Sponsorship Available</SelectItem>
+                      <SelectItem value="Any">Any / Not applicable</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="remotePolicy" className="block text-sm font-medium">
+                    Remote Policy
+                  </label>
+                  <Select
+                    name="remotePolicy"
+                    value={formData.remotePolicy}
+                    onValueChange={(value) => handleInputChange('remotePolicy', value)}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger id="remotePolicy" className="bg-input border-border/40">
+                      <SelectValue placeholder="Select remote policy" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Fully Remote">Fully Remote</SelectItem>
+                      <SelectItem value="Hybrid">Hybrid</SelectItem>
+                      <SelectItem value="On-site">On-site</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
               <div className="space-y-2">
                 <label htmlFor="description" className="block text-sm font-medium">
@@ -314,7 +452,7 @@ export default function ProviderOnboarding() {
                 </p>
               </div>
 
-              <div className="flex gap-3 pt-4">
+              <div className="flex flex-col sm:flex-row gap-4 pt-6">
                 <Button
                   type="button"
                   variant="outline"
@@ -323,7 +461,7 @@ export default function ProviderOnboarding() {
                     setProviderType(null);
                   }}
                   disabled={isLoading}
-                  className="flex-1 rounded-full border-border/40"
+                  className="flex-1 rounded-full border-border/40 hover:bg-card"
                 >
                   Back
                 </Button>
@@ -338,8 +476,9 @@ export default function ProviderOnboarding() {
               </div>
             </form>
           </Card>
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

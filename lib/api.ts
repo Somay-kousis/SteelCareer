@@ -8,6 +8,10 @@ export async function fetchSeeker() {
     },
   });
 
+  if (response.status === 401) {
+    return { seeker: null };
+  }
+
   if (!response.ok) {
     throw new Error('Failed to fetch seeker data');
   }
@@ -41,6 +45,10 @@ export async function fetchProvider() {
     },
   });
 
+  if (response.status === 401) {
+    return { provider: null };
+  }
+
   if (!response.ok) {
     throw new Error('Failed to fetch provider data');
   }
@@ -73,6 +81,10 @@ export async function fetchJobs() {
       'Content-Type': 'application/json',
     },
   });
+
+  if (response.status === 401) {
+    return { jobs: [] };
+  }
 
   if (!response.ok) {
     throw new Error('Failed to fetch jobs');

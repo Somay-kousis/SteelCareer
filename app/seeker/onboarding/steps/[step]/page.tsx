@@ -1,14 +1,13 @@
 'use client';
 
 import { use } from 'react';
-import { StepBasicInfo } from '@/components/seeker/step-basic-info';
-import { StepBackground } from '@/components/seeker/step-background';
-import { StepGoals } from '@/components/seeker/step-goals';
-import { StepLinks } from '@/components/seeker/step-links';
-import { StepDocuments } from '@/components/seeker/step-documents';
-import { StepSupport } from '@/components/seeker/step-support';
-import { StepReview } from '@/components/seeker/step-review';
+import { StepIdentity } from '@/components/seeker/step-identity';
+import { StepWorkAuth } from '@/components/seeker/step-work-auth';
+import { StepExperience } from '@/components/seeker/step-experience';
+import { StepLocationSalary } from '@/components/seeker/step-location-salary';
+import { StepSlotBooking } from '@/components/seeker/step-slot-booking';
 import { useRouter } from 'next/navigation';
+import { AnimatePresence } from 'framer-motion';
 
 interface StepPageProps {
   params: Promise<{ step: string }>;
@@ -20,7 +19,7 @@ export default function StepPage({ params }: StepPageProps) {
   const stepNumber = parseInt(step, 10);
 
   const handleNext = () => {
-    if (stepNumber < 7) {
+    if (stepNumber < 5) {
       router.push(`/seeker/onboarding/steps/${stepNumber + 1}`);
     }
   };
@@ -34,23 +33,25 @@ export default function StepPage({ params }: StepPageProps) {
   const renderStep = () => {
     switch (stepNumber) {
       case 1:
-        return <StepBasicInfo onNext={handleNext} />;
+        return <StepIdentity key="step1" onNext={handleNext} />;
       case 2:
-        return <StepBackground onNext={handleNext} onPrevious={handlePrevious} />;
+        return <StepWorkAuth key="step2" onNext={handleNext} onPrevious={handlePrevious} />;
       case 3:
-        return <StepGoals onNext={handleNext} onPrevious={handlePrevious} />;
+        return <StepExperience key="step3" onNext={handleNext} onPrevious={handlePrevious} />;
       case 4:
-        return <StepLinks onNext={handleNext} onPrevious={handlePrevious} />;
+        return <StepLocationSalary key="step4" onNext={handleNext} onPrevious={handlePrevious} />;
       case 5:
-        return <StepDocuments onNext={handleNext} onPrevious={handlePrevious} />;
-      case 6:
-        return <StepSupport onNext={handleNext} onPrevious={handlePrevious} />;
-      case 7:
-        return <StepReview onPrevious={handlePrevious} />;
+        return <StepSlotBooking key="step5" onPrevious={handlePrevious} />;
       default:
         return null;
     }
   };
 
-  return renderStep();
+  return (
+    <div className="relative z-10 w-full max-w-2xl px-4 py-8 pb-8 md:px-0 md:py-12 md:pb-12">
+      <AnimatePresence mode="wait">
+        {renderStep()}
+      </AnimatePresence>
+    </div>
+  );
 }

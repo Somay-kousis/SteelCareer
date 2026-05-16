@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 
 type Tab =
   | 'overview'
@@ -83,10 +85,9 @@ export default function AdminWorkspace() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-sm text-muted-foreground">
-          Loading admin workspace...
-        </p>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="w-8 h-8 animate-spin text-accent" />
+        <p className="text-sm text-muted-foreground animate-pulse">Loading admin workspace...</p>
       </div>
     );
   }
@@ -174,7 +175,6 @@ export default function AdminWorkspace() {
         </div>
 
         <div className="flex flex-wrap gap-3">
-
           {(
             [
               'overview',
@@ -187,16 +187,22 @@ export default function AdminWorkspace() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-5 py-2 rounded-full text-sm transition-all ${
+              className={`relative px-5 py-2 rounded-full text-sm transition-all outline-none ${
                 activeTab === tab
-                  ? 'bg-accent text-accent-foreground'
-                  : 'bg-card/40 border border-border/40 text-muted-foreground'
+                  ? 'text-accent-foreground'
+                  : 'bg-card/40 border border-border/40 text-muted-foreground hover:bg-card/60 hover:text-foreground'
               }`}
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              {activeTab === tab && (
+                <motion.div
+                  layoutId="admin-active-tab"
+                  className="absolute inset-0 bg-accent rounded-full -z-10"
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                />
+              )}
+              <span className="relative z-10 capitalize">{tab}</span>
             </button>
           ))}
-
         </div>
 
         {activeTab !== 'overview' && (
@@ -208,8 +214,16 @@ export default function AdminWorkspace() {
           />
         )}
 
+        <AnimatePresence mode="wait">
         {activeTab === 'overview' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <motion.div
+            key="overview"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+          >
 
             <Card className="border-border/40 bg-card/40 backdrop-blur-sm p-8 space-y-4">
               <h2 className="text-xl font-light">
@@ -257,11 +271,18 @@ export default function AdminWorkspace() {
               </div>
             </Card>
 
-          </div>
+          </motion.div>
         )}
 
         {activeTab === 'seekers' && (
-          <div className="space-y-4">
+          <motion.div
+            key="seekers"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-4"
+          >
             {filteredSeekers.map((seeker) => (
               <Card
                 key={seeker.id}
@@ -302,11 +323,18 @@ export default function AdminWorkspace() {
                 </div>
               </Card>
             ))}
-          </div>
+          </motion.div>
         )}
 
         {activeTab === 'providers' && (
-          <div className="space-y-4">
+          <motion.div
+            key="providers"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-4"
+          >
             {filteredProviders.map((provider) => (
               <Card
                 key={provider.id}
@@ -341,11 +369,18 @@ export default function AdminWorkspace() {
                 </div>
               </Card>
             ))}
-          </div>
+          </motion.div>
         )}
 
         {activeTab === 'jobs' && (
-          <div className="space-y-4">
+          <motion.div
+            key="jobs"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-4"
+          >
             {filteredJobs.map((job) => (
               <Card
                 key={job.id}
@@ -380,11 +415,18 @@ export default function AdminWorkspace() {
                 </div>
               </Card>
             ))}
-          </div>
+          </motion.div>
         )}
 
         {activeTab === 'requests' && (
-          <div className="space-y-4">
+          <motion.div
+            key="requests"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-4"
+          >
             {requests.map((request) => (
               <Card
                 key={request.id}
@@ -471,9 +513,9 @@ export default function AdminWorkspace() {
                 </div>
               </Card>
             ))}
-          </div>
+          </motion.div>
         )}
-
+        </AnimatePresence>
       </div>
     </div>
   );

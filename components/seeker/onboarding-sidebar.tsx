@@ -4,13 +4,11 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
 const steps = [
-  { id: 1, title: 'Basic Info', path: '/seeker/onboarding/steps/1' },
-  { id: 2, title: 'Background', path: '/seeker/onboarding/steps/2' },
-  { id: 3, title: 'Career Goals', path: '/seeker/onboarding/steps/3' },
-  { id: 4, title: 'Links & Portfolio', path: '/seeker/onboarding/steps/4' },
-  { id: 5, title: 'Documents', path: '/seeker/onboarding/steps/5' },
-  { id: 6, title: 'Support Needs', path: '/seeker/onboarding/steps/6' },
-  { id: 7, title: 'Review & Submit', path: '/seeker/onboarding/steps/7' },
+  { id: 1, title: 'Identity', path: '/seeker/onboarding/steps/1' },
+  { id: 2, title: 'Work Authorization', path: '/seeker/onboarding/steps/2' },
+  { id: 3, title: 'Experience', path: '/seeker/onboarding/steps/3' },
+  { id: 4, title: 'Location & Salary', path: '/seeker/onboarding/steps/4' },
+  { id: 5, title: 'Screening Slot', path: '/seeker/onboarding/steps/5' },
 ];
 
 export function OnboardingSidebar() {
