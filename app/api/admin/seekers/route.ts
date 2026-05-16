@@ -40,9 +40,11 @@ export async function GET(request: NextRequest) {
         status,
         first_name,
         last_name,
+        full_legal_name,
         email,
         current_title,
         years_experience,
+        total_it_experience,
         onboarding_completed_at,
         created_at,
         updated_at

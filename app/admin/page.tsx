@@ -60,11 +60,10 @@ export default function AdminWorkspace() {
   }, []);
 
   const filteredSeekers = useMemo(() => {
-    return seekers.filter((seeker) =>
-      `${seeker.first_name || ''} ${seeker.last_name || ''}`
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-    );
+    return seekers.filter((seeker) => {
+      const name = seeker.full_legal_name || `${seeker.first_name || ''} ${seeker.last_name || ''}`;
+      return name.toLowerCase().includes(searchTerm.toLowerCase());
+    });
   }, [seekers, searchTerm]);
 
   const filteredProviders = useMemo(() => {
@@ -237,7 +236,7 @@ export default function AdminWorkspace() {
                     className="border border-border/40 rounded-lg p-4"
                   >
                     <p className="font-medium">
-                      {seeker.first_name} {seeker.last_name}
+                      {seeker.full_legal_name || `${seeker.first_name || ''} ${seeker.last_name || ''}`.trim() || 'Unnamed Seeker'}
                     </p>
 
                     <p className="text-sm text-muted-foreground">
@@ -291,7 +290,7 @@ export default function AdminWorkspace() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-medium">
-                      {seeker.first_name} {seeker.last_name}
+                      {seeker.full_legal_name || `${seeker.first_name || ''} ${seeker.last_name || ''}`.trim() || 'Unnamed Seeker'}
                     </h3>
 
                     <p className="text-sm text-muted-foreground">
@@ -310,7 +309,7 @@ export default function AdminWorkspace() {
                       </p>
 
                       <p className="text-xs text-muted-foreground">
-                        {seeker.years_experience || 0} yrs exp
+                        {seeker.total_it_experience ?? seeker.years_experience ?? 0} yrs exp
                       </p>
                     </div>
 
