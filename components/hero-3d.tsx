@@ -1,7 +1,7 @@
 'use client';
 
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Environment, Float, MeshTransmissionMaterial } from '@react-three/drei';
+import { Environment, Float, MeshTransmissionMaterial, Sparkles } from '@react-three/drei';
 import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 
@@ -66,6 +66,24 @@ export default function Hero3D() {
         <directionalLight position={[-10, -10, -5]} intensity={0.5} color="#d946ef" />
         <pointLight position={[0, 0, 0]} intensity={0.5} color="#f97316" />
         
+        {/* Glowing floating particles in the background */}
+        <Sparkles 
+          count={100} 
+          scale={12} 
+          size={4} 
+          speed={0.4} 
+          opacity={0.2} 
+          color="#d946ef" 
+        />
+        <Sparkles 
+          count={50} 
+          scale={10} 
+          size={6} 
+          speed={0.2} 
+          opacity={0.1} 
+          color="#ffffff" 
+        />
+
         <AbstractMonolith />
         <Environment preset="city" />
       </Canvas>
