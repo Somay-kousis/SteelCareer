@@ -2,25 +2,16 @@
 
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
-
-const Hero3D = dynamic(() => import('@/components/hero-3d'), { 
-  ssr: false,
-  loading: () => <div className="absolute inset-0 bg-gradient-to-b from-background/50 to-background z-0" />
-})
 
 export default function HeroSection() {
   return (
     <section className="relative min-h-screen pt-32 pb-20 overflow-hidden flex flex-col items-center justify-center">
       {/* Ambient background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl opacity-40" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/3 rounded-full blur-3xl opacity-30" />
         <div className="absolute top-1/2 right-0 w-96 h-96 bg-accent/2 rounded-full blur-3xl opacity-20" />
       </div>
-
-      {/* 3D Canvas Element */}
-      <Hero3D />
 
       <div className="relative z-10 max-w-4xl mx-auto px-6 text-center space-y-8">
         {/* Main headline */}
