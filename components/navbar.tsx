@@ -9,7 +9,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo */}
         <Link href="#" className="text-xl font-light tracking-tight">
-          <span className="text-foreground">steel</span>
+          <span className="text-foreground">steele</span>
           <span className="text-accent">career</span>
         </Link>
 
